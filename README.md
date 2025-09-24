@@ -31,23 +31,36 @@ Blacklisting always wins — if something is in both lists (not recommended), it
 
 ## Configuration
 
-Config file path:
+Config file location (if created):
 
 ```text
 %LOCALAPPDATA%\Endgame\config.yaml
 ```
 
-Initial file is created on first run (from embedded default). Example:
+Behavior:
+
+- An embedded default configuration is always available inside the binary.
+- The physical `config.yaml` file is **not** written automatically anymore.
+- The file is created on-demand the first time you choose tray menu → "Configurations" (or if you create it manually).
+- If the file does not exist at startup, Endgame uses the embedded defaults in memory.
+
+Example file (what gets written when first created):
 
 ```yaml
 blacklist: ["explorer.exe", "dwm.exe", "csrss.exe", "winlogon.exe"]
 whitelist: ["game.exe", "someapp.exe"]
 ```
 
-- `blacklist` — Processes never terminated.
-- `whitelist` — High-priority targets. If running, the first match is terminated immediately.
+Fields:
 
-You can open the file quickly via tray menu → "Configurations".
+- `blacklist` — Processes never terminated (safety first).
+- `whitelist` — High-priority targets. If any are running, the first match is terminated immediately before other heuristics.
+
+Editing Tips:
+
+- Open via tray → "Configurations" to auto-create and edit.
+- Remove entries you do not want; names are case-insensitive comparisons on the executable filename.
+- Changes take effect the next time you trigger the hotkey (no restart required unless you add/remove the file itself).
 
 ## Install / Build
 
