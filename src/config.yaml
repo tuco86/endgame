@@ -1,0 +1,33 @@
+# Endgame Configuration File
+# This file controls which processes can be terminated by the Ctrl+Alt+End hotkey
+
+# Whitelist: Processes that will be killed FIRST if found running
+# These processes are checked before the foreground/fullscreen detection
+# Add game executables or specific applications you want to prioritize
+whitelist:
+  - "game.exe"              # Example game executable
+  - "BrokenArrow.exe"
+  # - "MyGame.exe"          # Add your games here
+  # - "steam_app_123456.exe" # Steam games often have numeric IDs
+  # - "UnityPlayer.exe"     # Unity-based games
+
+# Blacklist: Processes that will NEVER be killed (safety protection)
+# These are critical system processes and applications that should never be terminated
+blacklist:
+  - "explorer.exe"          # Windows Explorer (desktop/taskbar)
+  - "dwm.exe"               # Desktop Window Manager
+  - "csrss.exe"             # Client Server Runtime Process
+  - "winlogon.exe"          # Windows Logon Process
+  - "wininit.exe"           # Windows Initialization Process
+  - "services.exe"          # Service Control Manager
+  - "lsass.exe"             # Local Security Authority
+  - "smss.exe"              # Session Manager
+  - "svchost.exe"           # Service Host Process
+  - "system"                # NT Kernel & System
+  - "registry"              # Registry process
+  - "endgame.exe"           # Don't kill ourselves!
+  - "code.exe"            # VS Code
+  # - "discord.exe"         # Add other apps you never want killed
+  # - "obs64.exe"           # OBS Studio
+  # - "chrome.exe"          # Web browsers
+  # - "firefox.exe"
