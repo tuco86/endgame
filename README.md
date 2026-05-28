@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/endgame-icon.svg" alt="Endgame logo" width="180">
+</p>
+
 # Endgame
 
 A tiny Windows tray utility that lets you instantly terminate a stuck or runaway fullscreen game / app with a single global hotkey: **Ctrl+Alt+End**.
@@ -17,7 +21,8 @@ Sometimes games freeze, steal focus, or block input (especially in exclusive / b
   3. Largest true fullscreen window (monitor-sized)
 - Safety blacklist (never killed)
 - Configurable via YAML in `%LOCALAPPDATA%/Endgame/config.yaml`
-- System tray icon (right-click menu: open config / exit)
+- System tray icon (right-click menu: open config, open log folder, exit)
+- Daily rolling log files in `%LOCALAPPDATA%/Endgame/` (last 10 retained, release builds only)
 - Attempts to enable `SeDebugPrivilege` for elevated targets
 
 ## How It Chooses a Process
@@ -72,7 +77,7 @@ Editing Tips:
 
 ```powershell
 # Clone and build
-git clone https://github.com/yourname/endgame.git
+git clone https://github.com/tuco86/endgame.git
 cd endgame
 cargo build --release
 
@@ -86,7 +91,7 @@ Run it (release build detaches from console):
 ./target/release/endgame.exe
 ```
 
-A red circle icon appears in the system tray. Use the hotkey; watch the terminal (debug) or rely on tray behavior (release).
+The Endgame icon (broken Xbox controller pierced by a sword) appears in the system tray. Use the hotkey; watch the terminal (debug) or check the log folder (release).
 
 ### Auto-Start (Optional)
 
@@ -116,21 +121,20 @@ Create a shortcut to the release binary and place it in:
 - Process tree kill (children of the target)
 - Configurable hotkey
 - Better heuristics (GPU usage, focus history)
-- Optional logging to file with rotation
 - Notification balloons / richer status feedback
 
 ## Architecture Overview
 
-- **Tray layer:** `tray.rs` (winit + tray-icon) handles menu and tooltip
-- **Hotkey thread:** `hotkey.rs` registers and listens via a Win32 message loop on a worker thread
+- **Tray layer:** `tray.rs` (winit + tray-icon) handles menu, tooltip, and user-event dispatch
+- **Hotkey thread:** `hotkey.rs` registers and listens via a Win32 message loop on a worker thread; presses are forwarded to the winit event loop via `EventLoopProxy`
 - **Process logic:** `process.rs` handles privilege escalation, window enumeration, selection & termination
 - **Config loader:** `config.rs` embeds default YAML and persists user overrides
+- **Logging:** `log.rs` uses `simplelog` (terminal, debug) or `tracing-appender` (daily rolling files, release)
 - **Main:** wires modules, enables debug privilege, starts event loop
 
 ## Limitations
 
 - Does not currently attempt graceful shutdown
-- No logging/file telemetry by default
 - Only one global hotkey, not yet user-configurable
 - Multi-monitor fullscreen heuristic picks the largest monitor-sized window (improvable)
 

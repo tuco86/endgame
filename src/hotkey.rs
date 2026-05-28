@@ -1,8 +1,10 @@
-use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use windows_sys::Win32::Foundation::HWND;
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::{MOD_ALT, MOD_CONTROL, VK_END};
 use windows_sys::Win32::UI::WindowsAndMessaging::{MSG, WM_HOTKEY};
+use winit::event_loop::EventLoopProxy;
+
+use crate::tray::UserEvent;
 
 #[link(name = "user32")]
 unsafe extern "system" {
@@ -11,10 +13,9 @@ unsafe extern "system" {
     fn GetMessageW(lpMsg: *mut MSG, hWnd: HWND, wMsgFilterMin: u32, wMsgFilterMax: u32) -> i32;
 }
 
-pub const HOTKEY_ID: i32 = 1; // arbitrary id
+pub const HOTKEY_ID: i32 = 1;
 
-pub fn spawn_hotkey_listener() -> Receiver<()> {
-    let (tx, rx) = mpsc::channel();
+pub fn spawn_hotkey_listener(proxy: EventLoopProxy<UserEvent>) {
     thread::spawn(move || unsafe {
         if RegisterHotKey(0 as HWND, HOTKEY_ID, MOD_CONTROL | MOD_ALT, VK_END as u32) == 0 {
             log::error!("Failed to register hotkey Ctrl+Alt+End");
@@ -23,10 +24,9 @@ pub fn spawn_hotkey_listener() -> Receiver<()> {
         let mut msg: MSG = std::mem::zeroed();
         while GetMessageW(&mut msg as *mut MSG, 0 as HWND, 0, 0) != 0 {
             if msg.message == WM_HOTKEY && msg.wParam == HOTKEY_ID as usize {
-                let _ = tx.send(());
+                let _ = proxy.send_event(UserEvent::Hotkey);
             }
         }
         let _ = UnregisterHotKey(0 as HWND, HOTKEY_ID);
     });
-    rx
 }
